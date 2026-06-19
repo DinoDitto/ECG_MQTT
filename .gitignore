@@ -1,3 +1,6 @@
+# ===== 不上傳的個人文件 =====
+DEMO_講稿.md
+
 # ===== Node.js (ECG_Web) =====
 node_modules/
 *.log
