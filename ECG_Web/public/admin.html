@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理後台 — ECG Monitor</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+  <div id="guard" class="center-screen">
+    <div class="card"><p>驗證權限中…</p><p id="guard-msg" class="muted"></p></div>
+  </div>
+
+  <div id="main-view" class="hidden">
+    <header class="topbar admin-bar">
+      <span class="brand">🛡️ ECG 管理後台</span>
+      <div class="topbar-right">
+        <span id="welcome" class="muted"></span>
+        <a href="index.html" class="btn-link">前台</a>
+        <button id="logout-btn" class="btn-ghost">登出</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- 新增使用者 -->
+      <section class="card">
+        <div class="card-head"><h2>使用者管理</h2></div>
+        <form id="add-user-form" class="inline-form">
+          <input id="new-username" placeholder="新帳號" required>
+          <input id="new-password" type="password" placeholder="密碼" required>
+          <select id="new-role"><option value="user">user</option><option value="admin">admin</option></select>
+          <button type="submit">新增使用者</button>
+          <span id="add-msg" class="muted"></span>
+        </form>
+        <table class="data-table">
+          <thead><tr><th>ID</th><th>帳號</th><th>角色</th><th>BPM 筆數</th><th>警報</th><th>最後紀錄</th><th>操作</th></tr></thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </section>
+
+      <!-- 選定使用者的趨勢 -->
+      <section class="card">
+        <div class="card-head"><h2 id="chart-title">使用者心律趨勢</h2></div>
+        <canvas id="bpm-chart" height="90"></canvas>
+      </section>
+
+      <!-- 全系統警報 -->
+      <section class="card">
+        <h2>全系統警報紀錄</h2>
+        <table class="data-table">
+          <thead><tr><th>時間</th><th>使用者</th><th>心律</th><th>訊息</th></tr></thead>
+          <tbody id="alerts-tbody"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

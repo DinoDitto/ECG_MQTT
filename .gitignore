@@ -1,0 +1,28 @@
+# ===== Node.js (ECG_Web) =====
+node_modules/
+*.log
+server_out.log
+server_err.log
+
+# ===== 環境設定與資料庫（含密碼，不提交）=====
+.env
+*.db
+*.db-shm
+*.db-wal
+ecg.db*
+
+# ===== PlatformIO (ESP32 韌體) =====
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# ===== VSCode（保留 PlatformIO 自動產生設定，忽略個人設定）=====
+.vscode/.browse.c_cpp_properties.json
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/ipch/
+
+# ===== 作業系統 =====
+Thumbs.db
+desktop.ini
+.DS_Store

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的健康數據 — ECG Monitor</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+  <!-- 登入畫面 -->
+  <div id="login-view" class="center-screen">
+    <form id="login-form" class="card login-card">
+      <h1>❤️ ECG 健康數據</h1>
+      <p class="muted">請登入以查看您的心律紀錄</p>
+      <input id="username" type="text" placeholder="帳號" autocomplete="username" required>
+      <input id="password" type="password" placeholder="密碼" autocomplete="current-password" required>
+      <button type="submit">登入</button>
+      <p id="login-error" class="error"></p>
+    </form>
+  </div>
+
+  <!-- 主畫面 -->
+  <div id="main-view" class="hidden">
+    <header class="topbar">
+      <span class="brand">❤️ 我的健康數據</span>
+      <div class="topbar-right">
+        <span id="welcome" class="muted"></span>
+        <a id="admin-link" href="admin.html" class="hidden btn-link">管理後台</a>
+        <button id="logout-btn" class="btn-ghost">登出</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- 摘要卡片 -->
+      <section class="stats-grid">
+        <div class="card stat"><div class="stat-label">最新心律</div><div id="s-last" class="stat-value">--</div><div class="stat-unit">BPM</div></div>
+        <div class="card stat"><div class="stat-label">平均</div><div id="s-avg" class="stat-value">--</div><div class="stat-unit">BPM</div></div>
+        <div class="card stat"><div class="stat-label">最高 / 最低</div><div id="s-range" class="stat-value">-- / --</div><div class="stat-unit">BPM</div></div>
+        <div class="card stat"><div class="stat-label">警報次數</div><div id="s-alerts" class="stat-value">--</div><div class="stat-unit">次</div></div>
+      </section>
+
+      <!-- 趨勢圖 -->
+      <section class="card">
+        <div class="card-head">
+          <h2>心律趨勢</h2>
+          <button id="refresh-btn" class="btn-ghost">重新整理</button>
+        </div>
+        <canvas id="bpm-chart" height="100"></canvas>
+      </section>
+
+      <!-- 警報紀錄 -->
+      <section class="card">
+        <h2>近期警報</h2>
+        <table class="data-table">
+          <thead><tr><th>時間</th><th>心律</th><th>訊息</th></tr></thead>
+          <tbody id="alert-tbody"><tr><td colspan="3" class="muted">載入中…</td></tr></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
