@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECG MQTT 心電圖監測系統 — 專案說明</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c2330; --line:#2a3240;
+    --ink:#e6edf3; --muted:#8b98a9; --accent:#ff4d5e; --accent2:#3fb0ff;
+    --green:#3ddc97; --amber:#ffb454; --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.7;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px 80px}
+
+  /* hero */
+  header.hero{
+    text-align:center;padding:70px 22px 50px;
+    background:radial-gradient(900px 400px at 50% -10%,rgba(255,77,94,.18),transparent 70%);
+    border-bottom:1px solid var(--line);
+  }
+  .hero .pulse{font-size:48px}
+  .hero h1{font-size:2.3rem;margin:10px 0 6px;letter-spacing:1px}
+  .hero p{color:var(--muted);font-size:1.05rem}
+  .badges{margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .badge{
+    font-size:.82rem;padding:5px 13px;border-radius:999px;
+    background:var(--panel2);border:1px solid var(--line);color:var(--ink)
+  }
+
+  section{margin-top:46px}
+  h2{
+    font-size:1.4rem;margin-bottom:16px;display:flex;align-items:center;gap:10px;
+    padding-bottom:10px;border-bottom:1px solid var(--line)
+  }
+  h2 .n{color:var(--accent);font-size:1rem;font-weight:700}
+  h3{font-size:1.05rem;margin:18px 0 8px;color:var(--accent2)}
+  p.lead{color:var(--muted);margin-bottom:14px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+
+  /* flow diagram */
+  .flow{display:flex;flex-direction:column;gap:0;align-items:center;text-align:center}
+  .node{
+    background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+    padding:14px 20px;min-width:260px;
+  }
+  .node b{color:var(--ink)}
+  .node small{color:var(--muted);display:block;font-size:.82rem;margin-top:3px}
+  .node.sensor{border-color:var(--green)}
+  .node.mcu{border-color:var(--accent)}
+  .node.broker{border-color:var(--amber)}
+  .node.sink{border-color:var(--accent2)}
+  .arrow{color:var(--muted);font-size:1.4rem;line-height:1.2;margin:4px 0}
+  .split{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;width:100%}
+
+  /* grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .feat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .feat .ico{font-size:1.6rem}
+  .feat h4{margin:8px 0 4px;font-size:1rem}
+  .feat p{color:var(--muted);font-size:.9rem}
+
+  table{width:100%;border-collapse:collapse;font-size:.92rem;overflow:hidden;border-radius:var(--radius)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line)}
+  th{background:var(--panel2);color:var(--muted);font-size:.82rem;text-transform:uppercase;letter-spacing:.5px}
+  tr:hover td{background:var(--panel)}
+  code{background:#0a0d12;border:1px solid var(--line);padding:2px 7px;border-radius:6px;font-size:.86em;color:var(--green)}
+  .mono{font-family:"Consolas",monospace}
+
+  /* steps */
+  ol.steps{list-style:none;counter-reset:s}
+  ol.steps li{
+    counter-increment:s;position:relative;padding:12px 0 12px 48px;border-bottom:1px solid var(--line)
+  }
+  ol.steps li:last-child{border-bottom:none}
+  ol.steps li::before{
+    content:counter(s);position:absolute;left:0;top:11px;width:30px;height:30px;
+    background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem
+  }
+  ol.steps b{color:var(--ink)}
+  ol.steps small{color:var(--muted);display:block}
+
+  .note{background:rgba(255,180,84,.08);border-left:3px solid var(--amber);padding:12px 16px;border-radius:8px;color:var(--ink);font-size:.92rem}
+  .pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .pill{font-size:.8rem;background:var(--panel2);border:1px solid var(--line);padding:3px 11px;border-radius:999px;color:var(--muted)}
+
+  footer{margin-top:60px;text-align:center;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:24px}
+  a{color:var(--accent2)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="pulse">❤️</div>
+  <h1>ECG MQTT 心電圖即時監測系統</h1>
+  <p>AD8232 感測器 · ESP32 邊緣運算 · MQTT 傳輸 · Node-RED 視覺化 · Web 健康數據平台</p>
+  <div class="badges">
+    <span class="badge">ESP32</span>
+    <span class="badge">AD8232 ECG</span>
+    <span class="badge">MQTT / Mosquitto</span>
+    <span class="badge">Node-RED</span>
+    <span class="badge">Node.js + SQLite</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 1 專案簡介 -->
+  <section>
+    <h2><span class="n">01</span> 專案簡介</h2>
+    <div class="card">
+      <p class="lead">
+        本系統是一套基於 IoT 的即時心電圖（ECG）監測平台。使用 <b>AD8232 心電感測器</b> 擷取心臟電訊號，
+        由 <b>ESP32</b> 進行數位濾波與心律計算後，透過 <b>MQTT 協定</b> 傳送至電腦，
+        再以 <b>Node-RED</b> 顯示即時波形並執行警示流程，同時由 <b>網頁平台</b> 儲存與管理健康數據。
+      </p>
+      <div class="note">
+        作業需求對應：以 AD8232 為 Sensor → 傳到 MQTT Server → Node-RED 顯示心電圖
+        → 訊號超出設定值（130 BPM）即啟動警示流程。本專案全數達成，並額外實作資料庫與管理後台。
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 系統架構 -->
+  <section>
+    <h2><span class="n">02</span> 系統架構與資料流</h2>
+    <div class="card">
+      <div class="flow">
+        <div class="node sensor"><b>AD8232 ECG 感測器</b><small>擷取心電類比訊號 0~3.3V</small></div>
+        <div class="arrow">▼</div>
+        <div class="node mcu"><b>ESP32 NodeMCU-32</b><small>IIR 濾波 · R 波偵測 · 3 拍平均 BPM · LCD · 蜂鳴器</small></div>
+        <div class="arrow">▼ &nbsp;WiFi / MQTT</div>
+        <div class="node broker"><b>Mosquitto MQTT Broker</b><small>電腦 · 1883 埠 · 發佈/訂閱中心</small></div>
+        <div class="arrow">▼</div>
+        <div class="split">
+          <div class="node sink"><b>Node-RED</b><small>即時波形 · BPM 儀表 · 警示流程<br>localhost:1880/ui</small></div>
+          <div class="node sink"><b>Web 健康平台</b><small>歷史數據 · 管理後台 · SQLite<br>localhost:3000</small></div>
+        </div>
+      </div>
+      <p class="lead" style="margin-top:18px">
+        採用 MQTT 的 <b>發佈/訂閱（Pub/Sub）</b>架構：ESP32 只負責發佈資料，無需知道接收端是誰，
+        因此 Node-RED 與網頁平台可同時訂閱同一份資料，彼此完全獨立。
+      </p>
+    </div>
+
+    <h3>MQTT Topics</h3>
+    <table>
+      <tr><th>Topic</th><th>內容</th><th>說明</th></tr>
+      <tr><td class="mono">ecg/raw</td><td>0~4095</td><td>原始 ADC 值</td></tr>
+      <tr><td class="mono">ecg/nodc</td><td>整數</td><td>去直流訊號（畫波形）</td></tr>
+      <tr><td class="mono">ecg/bpm</td><td>整數</td><td>心律，每 3 拍更新</td></tr>
+      <tr><td class="mono">ecg/alert</td><td>HIGH:135</td><td>超過閾值時發送</td></tr>
+      <tr><td class="mono">ecg/status</td><td>LEAD_OFF</td><td>導線脫落</td></tr>
+    </table>
+  </section>
+
+  <!-- 3 功能特色 -->
+  <section>
+    <h2><span class="n">03</span> 功能特色</h2>
+    <div class="grid">
+      <div class="feat"><div class="ico">📈</div><h4>即時心電波形</h4><p>Node-RED Dashboard 以 100Hz 顯示連續 ECG 波形，可見每次心跳的 R 波尖峰。</p></div>
+      <div class="feat"><div class="ico">💓</div><h4>心律計算</h4><p>IIR 濾波 + 動態門檻波峰偵測 + 3 拍平均，計算穩定 BPM。</p></div>
+      <div class="feat"><div class="ico">🚨</div><h4>警示流程</h4><p>BPM 超過 130 即觸發：蜂鳴器連嗶、LCD 顯示 ALERT、Node-RED 彈出警報。</p></div>
+      <div class="feat"><div class="ico">🖥️</div><h4>本地顯示</h4><p>1602 LCD 即時顯示狀態與心率，無需連網也能看。</p></div>
+      <div class="feat"><div class="ico">🗄️</div><h4>資料持久化</h4><p>心律、警報寫入 SQLite，可查歷史趨勢與統計。</p></div>
+      <div class="feat"><div class="ico">👥</div><h4>多人管理後台</h4><p>管理員可檢視所有使用者數據，架構預留多裝置擴展。</p></div>
+    </div>
+  </section>
+
+  <!-- 4 硬體 -->
+  <section>
+    <h2><span class="n">04</span> 硬體與接腳</h2>
+    <table>
+      <tr><th>元件</th><th>ESP32 腳位</th><th>備註</th></tr>
+      <tr><td>AD8232 OUTPUT</td><td class="mono">GPIO36 (SVP)</td><td>類比輸入</td></tr>
+      <tr><td>AD8232 LO+ / LO-</td><td class="mono">GPIO34 / GPIO35</td><td>導線脫落偵測</td></tr>
+      <tr><td>AD8232 VCC</td><td class="mono">3.3V</td><td>感測器供電</td></tr>
+      <tr><td>LCD SDA / SCL</td><td class="mono">GPIO21 / GPIO22</td><td>I2C，位址 0x27</td></tr>
+      <tr><td>LCD VCC</td><td class="mono">5V</td><td>藍底 1602A 需 5V</td></tr>
+      <tr><td>蜂鳴器 +</td><td class="mono">GPIO13</td><td>被動式，PWM 2700Hz</td></tr>
+      <tr><td>藍色按鈕</td><td class="mono">GPIO12</td><td>開始 / 停止測量</td></tr>
+    </table>
+  </section>
+
+  <!-- 5 演算法 -->
+  <section>
+    <h2><span class="n">05</span> 訊號處理演算法</h2>
+    <div class="card">
+      <table>
+        <tr><th>步驟</th><th>方法</th><th>參數</th></tr>
+        <tr><td>① DC 移除</td><td>IIR 低通濾波</td><td class="mono">α = 0.995</td></tr>
+        <tr><td>② 雜訊追蹤</td><td>動態背景強度估計</td><td class="mono">α = 0.95</td></tr>
+        <tr><td>③ 觸發門檻</td><td>nodc_level + 偏移</td><td class="mono">+ 8.0</td></tr>
+        <tr><td>④ 波峰偵測</td><td>三點局部最大值</td><td>n1&gt;n2 &amp; n1&gt;n0 &amp; &gt;門檻</td></tr>
+        <tr><td>⑤ 不應期</td><td>避免重複觸發</td><td class="mono">250 ms</td></tr>
+        <tr><td>⑥ RR 驗證</td><td>合理間距範圍</td><td class="mono">270~2000 ms</td></tr>
+        <tr><td>⑦ N 拍平均</td><td>BPM = 3×60000 / ΣRR</td><td class="mono">3 拍</td></tr>
+        <tr><td>⑧ 警報</td><td>超過閾值發送</td><td class="mono">BPM &gt; 130</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 6 啟動步驟 -->
+  <section>
+    <h2><span class="n">06</span> 啟動步驟</h2>
+    <div class="card">
+      <ol class="steps">
+        <li><b>啟動 MQTT Broker</b><small>Mosquitto（D:\mosquitto），1883 埠，已允許區網連線</small></li>
+        <li><b>啟動 Web 平台</b><small>cd ECG_Web → npm start → http://localhost:3000</small></li>
+        <li><b>啟動 Node-RED</b><small>node-red → 匯入 flows.json → Deploy → http://localhost:1880/ui</small></li>
+        <li><b>燒錄 ESP32</b><small>PlatformIO → esp32dev → Upload</small></li>
+        <li><b>開始測量</b><small>貼好電極 → 按藍色按鈕 → 在 Dashboard 看即時波形與 BPM</small></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 7 技術棧 -->
+  <section>
+    <h2><span class="n">07</span> 技術棧</h2>
+    <div class="card">
+      <h3>韌體</h3>
+      <div class="pills"><span class="pill">ESP32 / Arduino</span><span class="pill">PlatformIO</span><span class="pill">PubSubClient (MQTT)</span><span class="pill">LiquidCrystal_I2C</span></div>
+      <h3>通訊</h3>
+      <div class="pills"><span class="pill">MQTT</span><span class="pill">Mosquitto Broker</span><span class="pill">WiFi</span></div>
+      <h3>視覺化與後端</h3>
+      <div class="pills"><span class="pill">Node-RED + Dashboard</span><span class="pill">Node.js / Express</span><span class="pill">SQLite</span><span class="pill">Chart.js</span></div>
+    </div>
+  </section>
+
+  <!-- 8 限制 -->
+  <section>
+    <h2><span class="n">08</span> 已知限制</h2>
+    <div class="card">
+      <p class="lead">
+        本系統為 <b>單導程、學術用途</b> 的 ECG 監測裝置，僅供研究與教學展示，<b>不得用於臨床診斷</b>。
+        訊號易受體動與電源雜訊干擾；MQTT 測試環境採匿名連線，正式部署應加入認證與 TLS。
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    ECG MQTT 心電圖監測系統 &nbsp;·&nbsp; 清大醫資所 IoT 專案 &nbsp;·&nbsp;
+    原始碼：<a href="https://github.com/DinoDitto/ECG_MQTT">github.com/DinoDitto/ECG_MQTT</a>
+  </footer>
+
+</div>
+</body>
+</html>
