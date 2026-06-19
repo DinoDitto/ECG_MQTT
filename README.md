@@ -6,6 +6,10 @@
 > 課程：清大醫資所 — IoT 心電圖監測專案
 > 硬體：NodeMCU-32 (ESP32) + AD8232 ECG Kit + LCD1602(I2C) + 蜂鳴器 + 按鈕
 
+## 🎬 Demo 影片
+
+▶️ **[點此觀看系統 Demo 影片](https://youtu.be/T6tIXR4A2ok)**
+
 ---
 
 ## 1. 系統架構
